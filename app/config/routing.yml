@@ -118,6 +118,9 @@ github_login:
 paypal_login:
     pattern: /login/check-paypal
 
+store_address:
+    resource: "@StoreGeoBundle/Resources/config/routing.yml"
+
 #
 # Plugins routes
 #

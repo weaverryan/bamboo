@@ -1,6 +1,11 @@
 parameters:
 
     #
+    # Services
+    #
+    elcodi.store.geo.services.geo_api_consumer.class: Elcodi\Store\GeoBundle\Services\GeoApiConsumer
+
+    #
     # Form Types
     #
     store.geo.form_type.address.class: Elcodi\Store\GeoBundle\Form\Type\AddressType

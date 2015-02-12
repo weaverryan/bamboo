@@ -67,6 +67,7 @@
         "incenteev/composer-parameter-handler": "~2.0",
         "hwi/oauth-bundle": "0.4.*@dev",
         "snc/redis-bundle": "~1.1",
+        "guzzlehttp/guzzle": "5.0.*@dev",
 
         "elcodi/bamboo-bundle": "~0.4.0",
         "elcodi/attribute-bundle": "~0.4.0",

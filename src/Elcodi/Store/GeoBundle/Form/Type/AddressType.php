@@ -36,24 +36,14 @@ class AddressType extends AbstractType
     protected $addressFactory;
 
     /**
-     * @var string
-     *
-     * Country namespace
-     */
-    protected $countryNamespace;
-
-    /**
      * Constructor
      *
      * @param AddressFactory $addressFactory   Address factory
-     * @param string         $countryNamespace Country namespace
      */
     public function __construct(
-        AddressFactory $addressFactory,
-        $countryNamespace
+        AddressFactory $addressFactory
     ) {
         $this->addressFactory = $addressFactory;
-        $this->countryNamespace = $countryNamespace;
     }
 
     /**
@@ -82,11 +72,17 @@ class AddressType extends AbstractType
         $builder
             ->add('name', 'text', [
                 'required' => true,
-                'label'    => 'Name',
+                'label'    => 'Address name',
+            ])
+            ->add('city', 'hidden', [
+                'required' => false,
+            ])
+            ->add('postalCode', 'text', [
+                'required' => true,
+                'label'    => 'Postal code',
             ])
             ->add('recipientName', 'text', [
                 'required' => true,
-                'label'    => 'Recipient name',
             ])
             ->add('recipientSurname', 'text', [
                 'required' => true,
@@ -100,28 +96,6 @@ class AddressType extends AbstractType
                 'required' => false,
                 'label'    => 'Address more',
             ])
-            ->add('postalcode', 'text', [
-                'required' => true,
-                'label'    => 'Postalcode',
-            ])
-            ->add('city', 'text', [
-                'required' => true,
-                'label'    => 'City',
-            ])
-            ->add('province', 'text', [
-                'required' => true,
-                'label'    => 'Province',
-            ])
-            ->add('state', 'text', [
-                'required' => true,
-                'label'    => 'State',
-            ])
-            ->add('country', 'entity', [
-                'class' => $this->countryNamespace,
-                'required' => true,
-                'label'    => 'Country',
-                'property' => 'name',
-            ])
             ->add('phone', 'text', [
                 'required' => true,
                 'label'    => 'Phone',
@@ -133,6 +107,9 @@ class AddressType extends AbstractType
             ->add('comments', 'textarea', [
                 'required' => false,
                 'label'    => 'Comments',
+            ])
+            ->add('apply', 'submit', [
+                'label'    => 'Save address'
             ]);
     }
 

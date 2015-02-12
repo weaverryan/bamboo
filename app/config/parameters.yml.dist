@@ -42,3 +42,5 @@ parameters:
 
     imagick_convert_bin_path: /usr/bin/convert
 
+    simple_geo_api_url: http://simplegeoapi.dev
+

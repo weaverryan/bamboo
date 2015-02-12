@@ -1,0 +1,13 @@
+services:
+
+    #
+    # Services
+    #
+    elcodi.store.geo.guzzle_client:
+       class: GuzzleHttp\Client
+
+    elcodi.store.geo.services.geo_api_consumer:
+        class: %elcodi.store.geo.services.geo_api_consumer.class%
+        arguments:
+            guzzle_client: @elcodi.store.geo.guzzle_client
+            simple_geo_api_url: %simple_geo_api_url%
