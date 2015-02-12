@@ -20,8 +20,12 @@ namespace Elcodi\Store\GeoBundle\Form\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\Validator\Constraints\Callback as AssertCallback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+use Elcodi\Component\Geo\Entity\Address;
 use Elcodi\Component\geo\Factory\AddressFactory;
+use Elcodi\Store\GeoBundle\Services\GeoApiConsumer;
 
 /**
  * Class AddressType
@@ -31,19 +35,36 @@ class AddressType extends AbstractType
     /**
      * @var string
      *
+     * The city type
+     */
+    const CITY_TYPE = 'city';
+
+    /**
+     * @var string
+     *
      * Address factory
      */
     protected $addressFactory;
 
     /**
+     * @var GeoApiConsumer
+     *
+     * A geo api consumer
+     */
+    private $geoApiConsumer;
+
+    /**
      * Constructor
      *
-     * @param AddressFactory $addressFactory   Address factory
+     * @param AddressFactory $addressFactory Address factory
+     * @param GeoApiConsumer $geoApiConsumer A geo api consumer
      */
     public function __construct(
-        AddressFactory $addressFactory
+        AddressFactory $addressFactory,
+        GeoApiConsumer $geoApiConsumer
     ) {
         $this->addressFactory = $addressFactory;
+        $this->geoApiConsumer = $geoApiConsumer;
     }
 
     /**
@@ -58,6 +79,9 @@ class AddressType extends AbstractType
         $resolver->setDefaults([
             'data_class' => $this->addressFactory->getEntityNamespace(),
             'empty_data' => $this->addressFactory->create(),
+            'constraints' => [
+                new AssertCallback([ [ $this, 'validateCityCode' ] ]),
+            ],
         ]);
     }
 
@@ -111,6 +135,26 @@ class AddressType extends AbstractType
             ->add('apply', 'submit', [
                 'label'    => 'Save address'
             ]);
+    }
+
+    /**
+     * Checks that the received city is a valid one
+     *
+     * @param Address                   $object  The address being validated
+     * @param ExecutionContextInterface $context The execution context
+     */
+    public function validateCityCode(Address $object, ExecutionContextInterface $context)
+    {
+        $area_info = $this->geoApiConsumer->getAreaInfo($object->getCity());
+
+        if(
+            empty($area_info) ||
+            self::CITY_TYPE !== $area_info['type']
+        ) {
+            $context
+                ->buildViolation('Select a city')
+                ->addViolation();
+        }
     }
 
     /**

@@ -132,13 +132,16 @@ class AddressController extends Controller
         FormView $formView,
         $isValid
     ) {
+        $entityManager = $this->get('elcodi.object_manager.address');
+
         if ($isValid) {
-            $this->get('elcodi.object_manager.address')
-                ->flush($address);
+            $entityManager->flush($address);
 
             return $this->redirect(
                 $this->generateUrl('store_address_list')
             );
+        } else {
+            $entityManager->clear($address);
         }
 
         $cityInfo = $this->get('elcodi.store.geo.services.geo_api_consumer')

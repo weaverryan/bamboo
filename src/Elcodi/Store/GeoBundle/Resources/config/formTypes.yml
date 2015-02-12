@@ -7,6 +7,6 @@ services:
         class: %store.geo.form_type.address.class%
         arguments:
             address_factory: @elcodi.factory.address
-            country_namespace: %elcodi.core.geo.entity.country.class%
+            geo_api_consumer: @elcodi.store.geo.services.geo_api_consumer
         tags:
             - { name: form.type, alias: store_geo_form_type_address }
