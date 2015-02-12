@@ -29,10 +29,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use Elcodi\Component\Geo\Entity\Address;
 use Elcodi\Component\Geo\Entity\City;
 use Elcodi\Component\Geo\Entity\Country;
-use Elcodi\Component\Geo\Entity\Interfaces\AddressInterface;
+use Elcodi\Component\Geo\Entity\Interfaces\LiteAddressInterface;
+use Elcodi\Component\Geo\Entity\LiteAddress;
 use Elcodi\Component\Geo\Entity\PostalCode;
 use Elcodi\Component\Geo\Entity\Province;
 use Elcodi\Component\Geo\Entity\State;
@@ -71,10 +71,10 @@ class AddressController extends Controller
         $geoApiAddressFinder = $this->get('elcodi.store.geo.services.geo_api_consumer');
         foreach ($addresses as $address) {
             /**
-             * @var Address $address
+             * @var LiteAddress $address
              */
-            $citiesInfo[$address->getCity()]
-                = $geoApiAddressFinder->getCityLocation($address->getCity());
+            $citiesInfo[$address->getCityId()]
+                = $geoApiAddressFinder->getCityLocation($address->getCityId());
         }
 
         return $this->renderTemplate(
@@ -89,9 +89,9 @@ class AddressController extends Controller
     /**
      * Edit address
      *
-     * @param AddressInterface $address  $address The address that we are editing
-     * @param FormView         $formView THe form view
-     * @param boolean          $isValid  If the form is valid
+     * @param LiteAddressInterface $address  $address The address that we are editing
+     * @param FormView             $formView THe form view
+     * @param boolean              $isValid  If the form is valid
      *
      * @return Response Response
      *
@@ -108,7 +108,7 @@ class AddressController extends Controller
      *
      * @EntityAnnotation(
      *      class = {
-     *          "factory" = "elcodi.factory.address",
+     *          "factory" = "elcodi.factory.lite_address",
      *          "method" = "create",
      *          "static" = false
      *      },
@@ -128,7 +128,7 @@ class AddressController extends Controller
      * )
      */
     public function editAction(
-        AddressInterface $address,
+        LiteAddressInterface $address,
         FormView $formView,
         $isValid
     ) {
@@ -145,7 +145,7 @@ class AddressController extends Controller
         }
 
         $cityInfo = $this->get('elcodi.store.geo.services.geo_api_consumer')
-            ->getCityLocation($address->getCity());
+            ->getCityLocation($address->getCityId());
 
         return $this->renderTemplate(
             'Pages:address-edit.html.twig',
@@ -160,9 +160,9 @@ class AddressController extends Controller
     /**
      * new address
      *
-     * @param AddressInterface $address  $address The address that we are editing
-     * @param FormView         $formView THe form view
-     * @param boolean          $isValid  If the form is valid
+     * @param LiteAddressInterface $address  $address The address that we are editing
+     * @param FormView             $formView THe form view
+     * @param boolean              $isValid  If the form is valid
      *
      * @return Response Response
      *
@@ -174,7 +174,7 @@ class AddressController extends Controller
      *
      * @EntityAnnotation(
      *      class = {
-     *          "factory" = "elcodi.factory.address",
+     *          "factory" = "elcodi.factory.lite_address",
      *          "method" = "create",
      *          "static" = false
      *      },
@@ -190,7 +190,7 @@ class AddressController extends Controller
      * )
      */
     public function newAction(
-        AddressInterface $address,
+        LiteAddressInterface $address,
         FormView $formView,
         $isValid
     ) {

@@ -23,8 +23,8 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints\Callback as AssertCallback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-use Elcodi\Component\Geo\Entity\Address;
-use Elcodi\Component\geo\Factory\AddressFactory;
+use Elcodi\Component\Geo\Entity\LiteAddress;
+use Elcodi\Component\Geo\Factory\LiteAddressFactory;
 use Elcodi\Store\GeoBundle\Services\GeoApiConsumer;
 
 /**
@@ -42,9 +42,9 @@ class AddressType extends AbstractType
     /**
      * @var string
      *
-     * Address factory
+     * Lite address factory
      */
-    protected $addressFactory;
+    protected $liteAddressFactory;
 
     /**
      * @var GeoApiConsumer
@@ -56,14 +56,14 @@ class AddressType extends AbstractType
     /**
      * Constructor
      *
-     * @param AddressFactory $addressFactory Address factory
-     * @param GeoApiConsumer $geoApiConsumer A geo api consumer
+     * @param LiteAddressFactory $liteAddressFactory Lite address factory
+     * @param GeoApiConsumer     $geoApiConsumer     A geo api consumer
      */
     public function __construct(
-        AddressFactory $addressFactory,
+        LiteAddressFactory $liteAddressFactory,
         GeoApiConsumer $geoApiConsumer
     ) {
-        $this->addressFactory = $addressFactory;
+        $this->liteAddressFactory = $liteAddressFactory;
         $this->geoApiConsumer = $geoApiConsumer;
     }
 
@@ -77,8 +77,8 @@ class AddressType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => $this->addressFactory->getEntityNamespace(),
-            'empty_data' => $this->addressFactory->create(),
+            'data_class' => $this->liteAddressFactory->getEntityNamespace(),
+            'empty_data' => $this->liteAddressFactory->create(),
             'constraints' => [
                 new AssertCallback([ [ $this, 'validateCityCode' ] ]),
             ],
@@ -98,7 +98,7 @@ class AddressType extends AbstractType
                 'required' => true,
                 'label'    => 'Address name',
             ])
-            ->add('city', 'hidden', [
+            ->add('cityId', 'hidden', [
                 'required' => false,
             ])
             ->add('postalCode', 'text', [
@@ -140,12 +140,12 @@ class AddressType extends AbstractType
     /**
      * Checks that the received city is a valid one
      *
-     * @param Address                   $object  The address being validated
+     * @param LiteAddress               $object  The address being validated
      * @param ExecutionContextInterface $context The execution context
      */
-    public function validateCityCode(Address $object, ExecutionContextInterface $context)
+    public function validateCityCode(LiteAddress $object, ExecutionContextInterface $context)
     {
-        $area_info = $this->geoApiConsumer->getAreaInfo($object->getCity());
+        $area_info = $this->geoApiConsumer->getAreaInfo($object->getCityId());
 
         if(
             empty($area_info) ||
