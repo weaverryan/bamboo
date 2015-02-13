@@ -1,3 +1,4 @@
+{# IMPORTANT: To make this work with JS you have to keep the id, "max-depth" and "url" data attributes #}
 <div id="js-area-selectors" {% if max_depth %}data-max-depth{% endif %} data-url="{{ url('city_selectors') }}">
     {% for select in selects %}
         <label for="{{ select.label }}">{{ select.label|capitalize|trans }}</label>
@@ -11,7 +12,3 @@
         </select>
     {% endfor %}
 </div>
-
-{% javascripts '@StoreGeoBundle/Resources/public/js/AreaSelectors.js' %}
-<script src="{{ asset_url }}"></script>
-{% endjavascripts %}

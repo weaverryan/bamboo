@@ -54,50 +54,15 @@ class AreaController extends Controller
     public function showCitySelectorAction(
         $areaId
     ) {
-        $selects        = [];
-        $maxDepth       = false;
-        $geoApiConsumer = $this->get('elcodi.store.geo.services.geo_api_consumer');
+        $citySelectorBuilder = $this->get('elcodi.store.geo.form.city_selector_builder');
 
-        $childrenAreas = $geoApiConsumer->getChildrenAreas();
-        $childSelector = [];
-        foreach ($childrenAreas as $childrenArea) {
-            $childSelector['label']                        = $childrenArea['type'];
-            $childSelector['options'][$childrenArea['id']] = $childrenArea['name'];
-        }
-
-        if (!is_null($areaId)) {
-            $areaInfo = $geoApiConsumer->getAreaLocation($areaId);
-            foreach ($areaInfo as $areaPartialInfo) {
-                $childSelector['selected'] = $areaPartialInfo['id'];
-                $selects[]                 = $childSelector;
-
-                $childrenAreas = $geoApiConsumer->getChildrenAreas($areaPartialInfo['id']);
-                if (!empty($childrenAreas)) {
-                    $childSelector = [];
-                    foreach ($childrenAreas as $childrenArea) {
-                        $childSelector['label'] = $childrenArea['type'];
-                        $childSelector['options'][$childrenArea['id']]
-                                                = $childrenArea['name'];
-                    }
-
-                } else {
-                    $maxDepth = true;
-                }
-                $childSelector['selected'] = $areaPartialInfo['id'];
-            }
-
-            if (!empty($childrenAreas)) {
-                $selects[] = $childSelector;
-            }
-        } else {
-            $selects[] = $childSelector;
-        }
+        $citySelectorBuilder->buildSelects($areaId);
 
         return $this->renderTemplate(
             'Subpages:country-selector.html.twig',
             [
-                'selects'   => $selects,
-                'max_depth' => $maxDepth
+                'selects'   => $citySelectorBuilder->getSelects(),
+                'max_depth' => $citySelectorBuilder->getMaxDepth()
             ]
         );
     }

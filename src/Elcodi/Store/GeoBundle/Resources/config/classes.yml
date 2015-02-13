@@ -3,7 +3,10 @@ parameters:
     #
     # Services
     #
+    elcodi.store.geo.guzzle_client.class: GuzzleHttp\Client
     elcodi.store.geo.services.geo_api_consumer.class: Elcodi\Store\GeoBundle\Services\GeoApiConsumer
+    elcodi.store.geo.form.city_selector_builder.class: Elcodi\Store\GeoBundle\Form\CitySelectorBuilder
+
 
     #
     # Form Types

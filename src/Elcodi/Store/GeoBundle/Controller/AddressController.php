@@ -19,23 +19,16 @@ namespace Elcodi\Store\GeoBundle\Controller;
 
 use Mmoreram\ControllerExtraBundle\Annotation\Entity as EntityAnnotation;
 use Mmoreram\ControllerExtraBundle\Annotation\Form as FormAnnotation;
-use Mmoreram\ControllerExtraBundle\Annotation\JsonResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use Elcodi\Component\Geo\Entity\City;
-use Elcodi\Component\Geo\Entity\Country;
 use Elcodi\Component\Geo\Entity\Interfaces\LiteAddressInterface;
-use Elcodi\Component\Geo\Entity\LiteAddress;
-use Elcodi\Component\Geo\Entity\PostalCode;
-use Elcodi\Component\Geo\Entity\Province;
-use Elcodi\Component\Geo\Entity\State;
+use Elcodi\Component\User\Entity\Interfaces\CustomerInterface;
 use Elcodi\Store\CoreBundle\Controller\Traits\TemplateRenderTrait;
 
 /**
@@ -71,7 +64,7 @@ class AddressController extends Controller
         $geoApiAddressFinder = $this->get('elcodi.store.geo.services.geo_api_consumer');
         foreach ($addresses as $address) {
             /**
-             * @var LiteAddress $address
+             * @var LiteAddressInterface $address
              */
             $citiesInfo[$address->getCityId()]
                 = $geoApiAddressFinder->getCityLocation($address->getCityId());
@@ -89,9 +82,8 @@ class AddressController extends Controller
     /**
      * Edit address
      *
-     * @param LiteAddressInterface $address  $address The address that we are editing
-     * @param FormView             $formView THe form view
-     * @param boolean              $isValid  If the form is valid
+     * @param integer $id      The address id
+     * @param Request $request The current request
      *
      * @return Response Response
      *
@@ -100,41 +92,26 @@ class AddressController extends Controller
      *      name = "store_address_edit",
      *      methods = {"GET","POST"}
      * )
-     * @Route(
-     *      path = "/new",
-     *      name = "store_address_new",
-     *      methods = {"GET","POST"}
-     * )
-     *
-     * @EntityAnnotation(
-     *      class = {
-     *          "factory" = "elcodi.factory.lite_address",
-     *          "method" = "create",
-     *          "static" = false
-     *      },
-     *      mapping = {
-     *          "id" = "~id~"
-     *      },
-     *      mappingFallback = true,
-     *      name = "address",
-     *      persist = false
-     * )
-     * @FormAnnotation(
-     *      class         = "store_geo_form_type_address",
-     *      name          = "formView",
-     *      entity        = "address",
-     *      handleRequest = true,
-     *      validate      = "isValid"
-     * )
      */
     public function editAction(
-        LiteAddressInterface $address,
-        FormView $formView,
-        $isValid
+        $id,
+        Request $request
     ) {
-        $entityManager = $this->get('elcodi.object_manager.address');
+        $address = $this->get('elcodi.repository.customer')
+            ->findAddress(
+                $this->getUser()->getId(),
+                $id
+            );
 
-        if ($isValid) {
+        if(false === $address) {
+            throw new NotFoundHttpException('Address not found');
+        }
+
+        $form = $this->createForm('store_geo_form_type_address', $address);
+        $form->handleRequest($request);
+
+        $entityManager = $this->get('elcodi.object_manager.address');
+        if ($form->isValid()) {
             $entityManager->flush($address);
 
             return $this->redirect(
@@ -144,15 +121,11 @@ class AddressController extends Controller
             $entityManager->clear($address);
         }
 
-        $cityInfo = $this->get('elcodi.store.geo.services.geo_api_consumer')
-            ->getCityLocation($address->getCityId());
-
         return $this->renderTemplate(
             'Pages:address-edit.html.twig',
             [
                 'address'   => $address,
-                'form'      => $formView,
-                'city_info' => $cityInfo,
+                'form'      => $form->createView()
             ]
         );
     }
@@ -217,6 +190,49 @@ class AddressController extends Controller
                 'address' => $address,
                 'form'    => $formView,
             ]
+        );
+    }
+
+    /**
+     * Delete address
+     *
+     * @param integer $id      The address id
+     *
+     * @return Response Response
+     *
+     * @Route(
+     *      path = "/delete/{id}",
+     *      name = "store_address_delete",
+     *      methods = {"GET"}
+     * )
+     */
+    public function deleteAction(
+        $id
+    ) {
+        /**
+         * @var CustomerInterface $customer
+         */
+        $customer = $this->getUser();
+
+        $address = $this->get('elcodi.repository.customer')
+            ->findAddress(
+                $customer->getId(),
+                $id
+            );
+
+        if(false === $address) {
+            throw new NotFoundHttpException('Address not found');
+        }
+
+        $customer->removeAddress($address);
+
+        $addressManager = $this->get('elcodi.object_manager.address');
+        $addressManager->remove($address);
+        $addressManager->remove($address);
+        $addressManager->flush();
+
+        return $this->redirect(
+            $this->generateUrl('store_address_list')
         );
     }
 }

@@ -7,6 +7,11 @@
 
     {% render url('city_selectors',{areaId:address.cityId}) %}
 
+    {# IMPORTANT This is used on the country-selector to make the city selectors work by JS remove at your own risk #}
+    {% javascripts '@StoreGeoBundle/Resources/public/js/AreaSelectors.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+
     <div class="form">
         {{ form(form) }}
     </div>
