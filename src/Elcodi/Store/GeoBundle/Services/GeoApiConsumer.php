@@ -140,6 +140,29 @@ class GeoApiConsumer
     }
 
     /**
+     * Gets the location for an area (From country to the received area).
+     *
+     * @param string $areaId The area identifier
+     *
+     * @return array the full location
+     */
+    public function getAreaLocation($areaId)
+    {
+        $url = sprintf(
+            '%s/area/%s/location',
+            $this->simpleGeoApiUrl,
+            $areaId
+        );
+
+        try {
+            $response = $this->guzzleClient->get($url);
+        } catch (RequestException $e) {
+            return [];
+        }
+        return $this->formatResponse($response);
+    }
+
+    /**
      * Formats the response from the api.
      *
      * @param mixed $response The API response to format.

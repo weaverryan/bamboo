@@ -36,63 +36,62 @@ class AreaController extends Controller
     use TemplateRenderTrait;
 
     /**
-     * Loads the area select subpage
-     *
-     * @param string $parentId   The parent identifier
-     * @param string $selectedId The options selected
-     *
-     * @return Response The area selector subpage
-     *
      * @Route(
-     *      path = "country",
-     *      name = "country_select_not_selected",
-     *      methods = {"GET","POST"},
+     *      path = "/selectors/{areaId}",
+     *      name = "city_selectors",
+     *      methods = {"GET"},
      *      defaults={
-     *          "parentId"   = null,
-     *          "selectedId" = null
-     *      }
-     * )
-     * @Route(
-     *      path = "country/{selectedId}",
-     *      name = "country_select",
-     *      methods = {"GET","POST"},
-     *      defaults={
-     *          "parentId"   = null,
-     *          "selectedId" = null
-     *      }
-     * )
-     *
-     * @Route(
-     *      path = "generic/{parentId}/{selectedId}",
-     *      name = "area_select",
-     *      methods = {"GET","POST"},
-     *      defaults={
-     *          "parentId"   = null,
-     *          "selectedId" = null
+     *          "areaId"   = null
      *      }
      * )
      */
-    public function showSelectAction(
-        $parentId,
-        $selectedId
+    public function showCitySelectorAction(
+        $areaId
     ) {
-        $rawOptions = $this->get('elcodi.store.geo.services.geo_api_consumer')
-            ->getChildrenAreas($parentId);
+        $selects        = [];
+        $maxDepth       = false;
+        $geoApiConsumer = $this->get('elcodi.store.geo.services.geo_api_consumer');
 
-        if(empty($rawOptions)) {
-            throw new NotFoundHttpException('No area found');
+        $childrenAreas = $geoApiConsumer->getChildrenAreas();
+        $childSelector = [];
+        foreach ($childrenAreas as $childrenArea) {
+            $childSelector['label']                        = $childrenArea['type'];
+            $childSelector['options'][$childrenArea['id']] = $childrenArea['name'];
         }
 
-        $options = [];
-        foreach ($rawOptions as $rawOption) {
-            $options[$rawOption['id']] = $rawOption['name'];
+        if (!is_null($areaId)) {
+            $areaInfo = $geoApiConsumer->getAreaLocation($areaId);
+            foreach ($areaInfo as $areaPartialInfo) {
+                $childSelector['selected'] = $areaPartialInfo['id'];
+                $selects[]                 = $childSelector;
+
+                $childrenAreas = $geoApiConsumer->getChildrenAreas($areaPartialInfo['id']);
+                if (!empty($childrenAreas)) {
+                    $childSelector = [];
+                    foreach ($childrenAreas as $childrenArea) {
+                        $childSelector['label'] = $childrenArea['type'];
+                        $childSelector['options'][$childrenArea['id']]
+                                                = $childrenArea['name'];
+                    }
+
+                } else {
+                    $maxDepth = true;
+                }
+                $childSelector['selected'] = $areaPartialInfo['id'];
+            }
+
+            if (!empty($childrenAreas)) {
+                $selects[] = $childSelector;
+            }
+        } else{
+            $selects[] = $childSelector;
         }
 
         return $this->renderTemplate(
-            'Subpages:area-select.html.twig',
+            'Subpages:country-selector.html.twig',
             [
-                'selected' => $selectedId,
-                'options'  => $options
+                'selects'   => $selects,
+                'max_depth' => $maxDepth
             ]
         );
     }
