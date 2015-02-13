@@ -36,6 +36,12 @@ class AreaController extends Controller
     use TemplateRenderTrait;
 
     /**
+     * Show the city selectors
+     *
+     * @param integer $areaId The area id
+     *
+     * @return Response
+     *
      * @Route(
      *      path = "/selectors/{areaId}",
      *      name = "city_selectors",
@@ -83,7 +89,7 @@ class AreaController extends Controller
             if (!empty($childrenAreas)) {
                 $selects[] = $childSelector;
             }
-        } else{
+        } else {
             $selects[] = $childSelector;
         }
 

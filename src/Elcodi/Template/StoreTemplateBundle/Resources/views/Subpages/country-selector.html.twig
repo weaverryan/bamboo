@@ -1,0 +1,17 @@
+<div id="js-area-selectors" {% if max_depth %}data-max-depth{% endif %} data-url="{{ url('city_selectors') }}">
+    {% for select in selects %}
+        <label for="{{ select.label }}">{{ select.label|capitalize|trans }}</label>
+        <select>
+            <option>Select one</option>
+            {% for key, value in select.options %}
+                <option value="{{ key }}"{% if key == select.selected %} selected{% endif %}>
+                    {{ value }}
+                </option>
+            {% endfor%}
+        </select>
+    {% endfor %}
+</div>
+
+{% javascripts '@StoreGeoBundle/Resources/public/js/AreaSelectors.js' %}
+<script src="{{ asset_url }}"></script>
+{% endjavascripts %}
