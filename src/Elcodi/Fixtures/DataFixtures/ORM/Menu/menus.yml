@@ -107,8 +107,15 @@ menu_nodes:
 
     bambooadmin_coupons:
         name: Discounts
-        code: ~
+        code: truck
         url: admin_coupon_list
+        enabled: 1
+        subnodes: ~
+
+    bambooadmin_shipping_ranges:
+        name: Shipping
+        code: truck
+        url: admin_shipping_range_list
         enabled: 1
         subnodes: ~
 
@@ -174,6 +181,7 @@ menus:
             - bambooadmin_medias
             - bambooadmin_banner_server
             - bambooadmin_coupons
+            - bambooadmin_shipping_ranges
             - bambooadmin_reports
             - bambooadmin_pages
             - bambooadmin_configurations
